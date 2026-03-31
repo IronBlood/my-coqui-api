@@ -3,6 +3,7 @@ from tempfile import NamedTemporaryFile
 from threading import Lock
 import os
 import random
+import torch
 
 from flask import Flask, jsonify, request, send_file, after_this_request
 from TTS.api import TTS
@@ -31,7 +32,11 @@ REFERENCE_WAVS = sorted(
 if not REFERENCE_WAVS:
     raise FileNotFoundError(f"No reference WAV files found in: {VOICE_DIR}")
 
-tts = TTS(MODEL_NAME)
+# Get device
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print(device)
+
+tts = TTS(MODEL_NAME).to(device)
 
 def choose_reference_wav() -> Path:
     return random.choice(REFERENCE_WAVS)
