@@ -9,13 +9,15 @@ This is the backend for the workshop [Build Your First AI Skill](https://github.
 3. Run `curl -X POST http://127.0.0.1:5002/tts -F "text=hello world" -F "language=en" --output en.wav`
 
 ```bash
-# Use `ghcr.io/coqui-ai/tts` if you want to use CUDA
+# will use CUDA if possible
 docker run --rm -it \
+  --gpus all \
   -v /path/to/models:/root/.local/share/tts \
   -v /path/to/this/repo:/workspace \
   -p 5002:5002 \
+  --entrypoint python3 \
   ghcr.io/coqui-ai/tts-cpu \
-  python3 /workspace/app.py
+  /workspace/app.py
 ```
 
 ## License
