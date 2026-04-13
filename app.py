@@ -27,13 +27,14 @@ app = Flask(__name__)
 if not VOICE_DIR.is_dir():
     raise FileNotFoundError(f"Voice directory not found: {VOICE_DIR}")
 
-REFERENCE_WAVS = sorted(
-    p for p in VOICE_DIR.iterdir()
-    if p.is_file() and p.suffix.lower() in VOICE_SUFFIXES
-)
-
-if not REFERENCE_WAVS:
-    raise FileNotFoundError(f"No reference WAV files found in: {VOICE_DIR}")
+def get_reference_wavs() -> list[Path]:
+    wavs  = sorted(
+        p for p in VOICE_DIR.iterdir()
+        if p.is_file() and p.suffix.lower() in VOICE_SUFFIXES
+    )
+    if not wavs:
+        raise FileNotFoundError(f"No reference WAV files found in: {VOICE_DIR}")
+    return wavs
 
 # Get device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -42,7 +43,7 @@ print(device)
 tts = TTS(MODEL_NAME).to(device)
 
 def choose_reference_wav() -> Path:
-    return random.choice(REFERENCE_WAVS)
+    return random.choice(get_reference_wavs())
 
 @app.get("/")
 def index():
@@ -50,11 +51,15 @@ def index():
 
 @app.get("/health")
 def health():
+    try:
+        reference_wavs = get_reference_wavs()
+    except FileNotFoundError as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
     return jsonify({
         "ok": True,
         "model": MODEL_NAME,
-        "voice_count": len(REFERENCE_WAVS),
-        "voices": [p.name for p in REFERENCE_WAVS],
+        "voice_count": len(reference_wavs),
+        "voices": [p.name for p in reference_wavs],
     })
 
 @app.post("/tts")
