@@ -79,6 +79,7 @@ def synthesize():
 
     out_path = None
     reference_wav = choose_reference_wav()
+    print(f" > Reference WAV: {reference_wav.name}")
 
     try:
         with tts_lock:
