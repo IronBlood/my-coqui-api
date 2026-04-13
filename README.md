@@ -2,11 +2,14 @@
 
 This is the backend for the workshop [Build Your First AI Skill](https://github.com/codebar-shanghai/workshop-agents-skills).
 
+![preview](./demo.png)
+
 ## How to Use
 
 1. Put reference audio files (`*.wav`) under the folder `voices`.
 2. Start the container.
-3. Run `curl -X POST http://127.0.0.1:5002/tts -F "text=hello world" -F "language=en" --output en.wav`
+3. Visit `http://127.0.0.1:5002` *or*
+4. Run `curl -X POST http://127.0.0.1:5002/tts -F "text=hello world" -F "language=en" --output en.wav`
 
 ```bash
 # will use CUDA if possible
