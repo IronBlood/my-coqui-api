@@ -8,8 +8,11 @@ import torch
 from flask import Flask, jsonify, request, send_file, after_this_request
 from TTS.api import TTS
 
+APP_DIR = Path(__file__).resolve().parent
+
 MODEL_NAME = "tts_models/multilingual/multi-dataset/xtts_v2"
-VOICE_DIR = Path(__file__).with_name("voices")
+VOICE_DIR = APP_DIR / "voices"
+INDEX_FILE = APP_DIR / "index.html"
 
 ALLOWED_LANGUAGES = {
     "en", "es", "fr", "de", "it", "pt", "pl", "tr", "ru",
@@ -40,6 +43,10 @@ tts = TTS(MODEL_NAME).to(device)
 
 def choose_reference_wav() -> Path:
     return random.choice(REFERENCE_WAVS)
+
+@app.get("/")
+def index():
+    return send_file(INDEX_FILE)
 
 @app.get("/health")
 def health():

@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TTS Demo</title>
+</head>
+<body>
+  <h1>TTS Demo</h1>
+
+  <form id="tts-form">
+    <div>
+      <label for="text">Text</label><br>
+      <textarea id="text" name="text" rows="4" cols="50"></textarea>
+    </div>
+
+    <div>
+      <label for="language">Language</label><br>
+      <input id="language" name="language" type="text" value="en">
+    </div>
+
+    <div>
+      <button type="submit">Generate</button>
+    </div>
+  </form>
+
+  <p id="status"></p>
+  <audio id="player" controls></audio>
+
+  <script>
+    const form = document.getElementById("tts-form");
+    const status = document.getElementById("status");
+    const player = document.getElementById("player");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      status.textContent = "Generating...";
+      player.removeAttribute("src");
+      player.load();
+
+      const formData = new FormData(form);
+
+      try {
+        const resp = await fetch("/tts", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!resp.ok) {
+          let message = `HTTP ${resp.status}`;
+          try {
+            const data = await resp.json();
+            if (data.error) {
+              message = data.error;
+            }
+          } catch (_) {}
+          throw new Error(message);
+        }
+
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        player.src = url;
+        player.load();
+        status.textContent = "Done.";
+      } catch (err) {
+        status.textContent = `Error: ${err.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
